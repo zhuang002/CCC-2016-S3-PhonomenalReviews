@@ -19,7 +19,9 @@ public class PhonomenalReviews {
     static HashSet<Integer> phoRestaurants = new HashSet();
     static int N, M;
     static int aPhoRestaurant = -1;
-    static HashMap<String,Integer> getTreeDepthBackup=new HashMap();
+    static HashMap<Int2DKey,Integer> getTreeDepthBackup=new HashMap();
+    static HashMap<Int2DKey,Integer> getTreeDiameterBackup=new HashMap();
+    static int trimSize=0;
 
     /**
      * @param args the command line arguments
@@ -43,9 +45,8 @@ public class PhonomenalReviews {
 
         }
 
-        removeUnnecessaryNodes(aPhoRestaurant);
         int diameter = getTreeDiameter();
-        System.out.println((graph.size()-1)*2-diameter);
+        System.out.println((graph.size()-trimSize-1)*2-diameter);
     }
 
     private static void addConnection(int node1, int node2) {
@@ -60,49 +61,22 @@ public class PhonomenalReviews {
         }
     }
 
-    private static void removeUnnecessaryNodes(int root) {
-        removeUnecessaryChildTree(null, root);
-    }
-
-    private static boolean removeUnecessaryChildTree(Integer root, Integer subRoot) {
-        HashSet<Integer> subNodes = graph.get(subRoot);
-        if (subNodes == null) {
-            return true;
-        }
-        HashSet<Integer> toBeRemoved=new HashSet();
-        for (Integer subNode : subNodes) {
-            if (subNode==root) continue;
-            
-            if (removeUnecessaryChildTree(subRoot, subNode)) {
-                toBeRemoved.add(subNode);
-            }
-        }
-        for (Integer subNode:toBeRemoved) {
-            removeSubtree(subNode);
-        }
-
-        if (subNodes.size() == 1 && !phoRestaurants.contains(subRoot)) {
-            //removeSubtree(subRoot);
-            return true;
-        }
-        return false;
-    }    
-
-    private static void removeSubtree(Integer subRoot) {
-        HashSet<Integer> connectedNodes=graph.get(subRoot);
-        for (Integer node : connectedNodes) {
-            graph.get(node).remove(subRoot); 
-        }
-        graph.remove(subRoot);
-    }
+   
 
     private static int getTreeDiameter() {
-        return getTreeDiameter(null,aPhoRestaurant);
-        
+        return getTreeDiameter(-1,aPhoRestaurant);
     }
 
-    private static int getTreeDiameter(Object root, int subRoot) {
+    private static int getTreeDiameter(Integer root, Integer subRoot) {
+        Int2DKey key=new Int2DKey(root,subRoot);
+        if (getTreeDiameterBackup.containsKey(key))
+            return getTreeDiameterBackup.get(key);
+        
         HashSet<Integer> connectedNodes=graph.get(subRoot);
+        if (root==-1 && connectedNodes.isEmpty() || root!=-1 && connectedNodes.size() ==1) {
+            //if (!phoRestaurants.contains(subRoot)) trimSize++;
+            return 0;
+        }
         int maxDiameter=-1;
         int maxDepth1=-1;
         int maxDepth2=-1;
@@ -117,23 +91,53 @@ public class PhonomenalReviews {
             } else if (depth>maxDepth2)
                 maxDepth2=depth;
         }
-        return Math.max(maxDiameter, maxDepth1+maxDepth2+2);
+        int retDiameter=Math.max(maxDiameter, maxDepth1+maxDepth2+2);
+        getTreeDiameterBackup.put(key,retDiameter);
+        return retDiameter;
     }
 
     private static int getTreeDepth(Integer root, Integer subRoot) {
-        String backupKey=root+"-"+subRoot;
+        Int2DKey backupKey=new Int2DKey(root,subRoot);
         if (getTreeDepthBackup.containsKey(backupKey)) return getTreeDepthBackup.get(backupKey);
         
         int maxDepth=-1;
         HashSet<Integer> connectedNodes=graph.get(subRoot);
+        
         for (Integer node:connectedNodes) {
             if (node==root) continue;
             int depth=getTreeDepth(subRoot,node);
             if (depth>maxDepth) maxDepth=depth;
         }
-        maxDepth++;
+        if (maxDepth!=-1 || phoRestaurants.contains(subRoot)) {
+            maxDepth++;
+        }
+        if (maxDepth==-1) trimSize++;
         getTreeDepthBackup.put(backupKey, maxDepth);
         return maxDepth;
     }
+    
+}
 
+class Int2DKey {
+    Integer i;
+    Integer j;
+    
+    public Int2DKey(Integer x,Integer y){
+        i=x;
+        j=y;
+    } 
+    
+    @Override
+    public boolean equals(Object o) {
+        return this.i.equals(((Int2DKey)o).i) && this.j.equals(((Int2DKey)o).j);
+    }
+    
+    @Override
+    public int hashCode() {
+        int prime=31;
+        int result=1;
+        result=prime*result+i.hashCode();
+        result=prime*result+j.hashCode();
+        return result;
+    }
 }
