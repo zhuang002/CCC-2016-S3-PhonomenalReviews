@@ -5,3 +5,10 @@ Problem URL:
 
 Test Status:
 	Fully passed
+
+Branches:
+
+	master: trim the non-pho nodes and use recursive implementation. Partially passed with performance timeout
+	optimize-recursive: optimize the recursive method. Partially passed with performance timeout
+	using-start: using the 2 furthest path method. Fully passed.
+	
