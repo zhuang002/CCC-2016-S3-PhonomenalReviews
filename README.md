@@ -8,7 +8,11 @@ Test Status:
 
 Branches:
 
-	master: trim the non-pho nodes and use recursive implementation. Partially passed with performance timeout
-	optimize-recursive: optimize the recursive method. Partially passed with performance timeout
-	using-start: using the 2 furthest path method. Fully passed.
+	master: trim the non-pho nodes and use recursive implementation. Partially passed with performance timeout。 Java
+	optimize-recursive: optimize the recursive method. Partially passed with performance timeout. Java
+	using-start: using the 2 furthest path method. Fully passed. Java
+	
+IDE:
+	
+	Netbeans Project
 	
